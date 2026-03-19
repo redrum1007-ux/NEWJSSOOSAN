@@ -112,8 +112,7 @@ export default function ProductDetailPage() {
               <span className="w-8 h-[1px] bg-[#c59f59]"></span>
               PREMIUM PRODUCT
             </h3>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{product.name}</h2>
-            <p className="text-slate-400 mb-8 leading-relaxed">{product.desc}</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">{product.name}</h2>
 
             {/* Info Table */}
             <div className="border border-[#c59f59]/10 rounded-xl overflow-hidden mb-8">
