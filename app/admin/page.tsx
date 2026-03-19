@@ -1214,7 +1214,7 @@ export default function AdminPage() {
   const [productList, setProductList] = useState<Product[]>([]);
 
   useEffect(() => {
-    fetch('/api/products')
+    fetch('/api/products', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data.products) setProductList(data.products);

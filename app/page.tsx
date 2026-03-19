@@ -10,7 +10,7 @@ export default function HomePage() {
   const [displayProducts, setDisplayProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    fetch('/api/products')
+    fetch('/api/products', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data.products) setDisplayProducts(data.products.slice(0, 4));

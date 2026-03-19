@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readDB, writeDB } from '@/lib/db';
 import { Product, products as INITIAL_PRODUCTS } from '@/lib/products';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   let products = await readDB<Product>('products');
   if (!products || products.length === 0) {
