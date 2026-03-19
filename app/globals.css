@@ -1,0 +1,103 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+@theme inline {
+  --color-primary: #c59f59;
+  --color-background-light: #f8f7f6;
+  --color-background-dark: #021127;
+  --color-navy-muted: #031a3a;
+  
+  --font-sans: var(--font-manrope), var(--font-noto-sans-kr), ui-sans-serif, system-ui;
+}
+
+:root {
+  --background: #f8f7f6;
+  --foreground: #0f172a;
+}
+
+.dark {
+  --background: #021127;
+  --foreground: #f8fafc;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.hero-gradient {
+  background: linear-gradient(to bottom, rgba(2, 17, 39, 0.3) 0%, rgba(2, 17, 39, 0.8) 100%);
+}
+
+/* ===== 상품 상세 페이지: 리치텍스트 렌더링 ===== */
+.rich-text-content {
+  /* 기본 컬러 리셋 (화이트 배경 섹션이므로) */
+  color: #1a1a1a;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+
+/* 인라인 스타일 div (프리미엄 템플릿)는 그대로 유지 */
+.rich-text-content div,
+.rich-text-content section {
+  box-sizing: border-box;
+}
+
+/* Quill이 생성하는 일반 텍스트 태그 스타일링 */
+.rich-text-content > h1,
+.rich-text-content > h2,
+.rich-text-content > h3,
+.rich-text-content > h4 {
+  color: #0A192F;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.rich-text-content > p {
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+.rich-text-content > ul,
+.rich-text-content > ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+.rich-text-content > ul li {
+  list-style-type: disc;
+  margin-bottom: 0.4rem;
+}
+
+.rich-text-content > ol li {
+  list-style-type: decimal;
+  margin-bottom: 0.4rem;
+}
+
+.rich-text-content blockquote {
+  border-left: 4px solid #c59f59;
+  padding-left: 1rem;
+  color: #6b7280;
+  font-style: italic;
+  margin: 1.5rem 0;
+}
+
+.rich-text-content img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 1rem auto;
+  display: block;
+}
+
+.rich-text-content a {
+  color: #c59f59;
+  text-decoration: underline;
+}
+
+/* Quill 에디터 CSS 클래스 지원 */
+.rich-text-content .ql-align-center { text-align: center; }
+.rich-text-content .ql-align-right  { text-align: right; }
+.rich-text-content .ql-align-justify { text-align: justify; }
+

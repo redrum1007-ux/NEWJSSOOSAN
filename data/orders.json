@@ -1,0 +1,66 @@
+[
+  {
+    "id": "ORD-20260318-001",
+    "createdAt": "2026-03-18T06:00:00Z",
+    "customerName": "김진성",
+    "customerPhone": "010-1234-5678",
+    "customerEmail": "kim@example.com",
+    "address": "서울시 강남구 테헤란로 123 456동 789호",
+    "items": [
+      {
+        "name": "완도산 특대 건전복 (250g)",
+        "quantity": 2,
+        "price": 89000
+      },
+      {
+        "name": "동해 황금 명태포 (500g)",
+        "quantity": 1,
+        "price": 45000
+      }
+    ],
+    "totalPrice": 223000,
+    "status": "pending",
+    "memo": ""
+  },
+  {
+    "id": "ORD-20260317-002",
+    "createdAt": "2026-03-17T09:30:00Z",
+    "customerName": "이수진",
+    "customerPhone": "010-9876-5432",
+    "customerEmail": "lee@example.com",
+    "address": "부산시 해운대구 해운대로 567 101호",
+    "items": [
+      {
+        "name": "제주 흑해삼 (3마리)",
+        "quantity": 1,
+        "price": 120000
+      }
+    ],
+    "totalPrice": 120000,
+    "status": "confirmed",
+    "memo": "문 앞에 놔주세요"
+  },
+  {
+    "id": "ORD-20260316-003",
+    "createdAt": "2026-03-16T14:20:00Z",
+    "customerName": "박상훈",
+    "customerPhone": "010-5555-7777",
+    "customerEmail": "park@example.com",
+    "address": "인천시 연수구 송도대로 250 1205동 302호",
+    "items": [
+      {
+        "name": "남해안 황금 멸치 (300g)",
+        "quantity": 3,
+        "price": 28000
+      },
+      {
+        "name": "완도산 특대 건전복 (250g)",
+        "quantity": 1,
+        "price": 89000
+      }
+    ],
+    "totalPrice": 173000,
+    "status": "shipping",
+    "memo": ""
+  }
+]

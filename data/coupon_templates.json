@@ -1,0 +1,15 @@
+[
+  {
+    "id": "1294b780-4761-4127-8c85-9d6459be9607",
+    "code": "WELCOME10",
+    "name": "신규가입 10% 할인 쿠폰",
+    "type": "percent",
+    "value": 10,
+    "minOrderAmount": 30000,
+    "maxDiscount": 20000,
+    "triggerEvent": "signup",
+    "validDays": 30,
+    "isActive": true,
+    "createdAt": "2026-03-19T01:14:32.752Z"
+  }
+]
