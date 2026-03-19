@@ -2,17 +2,38 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getProductById, products } from '@/lib/products';
+import { Product } from '@/lib/products';
 import { useCartStore } from '@/store/useCartStore';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  const product = getProductById(id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [otherProducts, setOtherProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const { addToCart } = useCartStore();
   const [added, setAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (data.products) {
+          const found = data.products.find((p: Product) => p.id === id);
+          if (found) setProduct(found);
+          
+          setOtherProducts(data.products.filter((p: Product) => p.id !== id).slice(0, 3));
+        }
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return <div className="min-h-screen bg-[#021127] flex items-center justify-center text-[#c59f59]">로딩 중...</div>;
+  }
 
   if (!product) {
     return (
@@ -39,8 +60,6 @@ export default function ProductDetailPage() {
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
-
-  const otherProducts = products.filter(p => p.id !== id).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-[#021127]">

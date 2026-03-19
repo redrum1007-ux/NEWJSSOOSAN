@@ -1211,7 +1211,16 @@ export default function AdminPage() {
   const [adminPw, setAdminPw] = useState('');
 
   const [activeTab, setActiveTab] = useState<Tab>('register');
-  const [productList, setProductList] = useState<Product[]>(initialProducts);
+  const [productList, setProductList] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.products) setProductList(data.products);
+      })
+      .catch((err) => console.error('상품 목록 불러오기 오류:', err));
+  }, []);
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     category: '프리미엄 건어물',
@@ -1313,7 +1322,6 @@ export default function AdminPage() {
       return;
     }
     setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 800));
 
     const newProduct: Product = {
       id: String(Date.now()),
@@ -1321,23 +1329,50 @@ export default function AdminPage() {
       desc: formData.description.replace(/<[^>]*>/g, '').substring(0, 50) + '...',
       price: Number(formData.price),
       priceText: Number(formData.price).toLocaleString(),
-      tag: formData.tag,
+      tag: formData.tag, // 'Best', 'Limited' 등 선택 가능하도록
       img: formData.imagePreview,
-      detail: formData.description,
-      origin: '국내산',
-      weight: '-',
+      detail: formData.description, // Quill의 HTML 태그 그대로 저장
+      origin: '국내산', // 임시
+      weight: '-', // 임시
     };
 
-    setProductList((prev) => [...prev, newProduct]);
-    setSuccessMessage(`"${formData.name}" 상품이 등록되었습니다!`);
-    setFormData({ name: '', category: '프리미엄 건어물', description: '', price: '', image: null, imagePreview: '', tag: '' });
+    try {
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newProduct),
+      });
+
+      if (res.ok) {
+        setProductList((prev) => [...prev, newProduct]);
+        setSuccessMessage(`"${formData.name}" 상품이 등록되었습니다!`);
+        setFormData({ name: '', category: '프리미엄 건어물', description: '', price: '', image: null, imagePreview: '', tag: '' });
+      } else {
+        alert('상품 등록에 실패했습니다.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('상품 등록 중 오류가 발생했습니다.');
+    }
+
     setIsSubmitting(false);
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
-      setProductList((prev) => prev.filter((p) => p.id !== id));
+      try {
+        const res = await fetch(`/api/products?id=${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          setProductList((prev) => prev.filter((p) => p.id !== id));
+        } else {
+          alert('삭제에 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('삭제 오류:', error);
+      }
     }
   };
 

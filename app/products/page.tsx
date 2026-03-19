@@ -1,16 +1,26 @@
 'use client';
-
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AuthControls from '@/components/AuthControls';
-import { products } from '@/lib/products';
+import { Product } from '@/lib/products';
 import { useCartStore } from '@/store/useCartStore';
-import { useState } from 'react';
 
 export default function ProductsPage() {
   const { addToCart } = useCartStore();
   const [addedId, setAddedId] = useState<string | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAddToCart = (product: typeof products[0]) => {
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.products) setProducts(data.products);
+        setLoading(false);
+      });
+  }, []);
+
+  const handleAddToCart = (product: Product) => {
     addToCart({
       id: product.id,
       name: product.name,

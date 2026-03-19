@@ -1,9 +1,21 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AuthControls from '@/components/AuthControls';
 import HeroSlider from '@/components/HeroSlider';
+import { Product } from '@/lib/products';
+
 export default function HomePage() {
+  const [displayProducts, setDisplayProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        if (data.products) setDisplayProducts(data.products.slice(0, 4));
+      });
+  }, []);
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
       {/* Header Section */}
@@ -60,12 +72,7 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { id: 1, name: '대왕 전복', desc: '완도산 최상급 대형 전복', price: '185,000', tag: 'Best', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB7NxlmVsIvX5MbcZso5jYpkS_8oIGMVq3cB3xymowbMs5PJLva5chID9hY7SB7jUcEBErg7vFfn_t--rTUiXs3nlrS4EQ6j7F6x4BXubiceJwgntCyfkUo5UGMQ24VfVwmhG8Rr1Q7TUBgzmUc_tEo-bbmzzR2cJJNTc0Gl-MYwPgi_w0OE6hnpQUq5LI34uPkUvfOeQ-QAoAz0Y-yXJI5j8oZK5pmg6Y5T-UAO3q6fdsJFzhEYkCUix8DULJGFHSqPLd4bH6e4-sD' },
-              { id: 2, name: '프리미엄 선물 세트', desc: '품격 있는 보자기 포장 서비스', price: '240,000', tag: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDhaTp38Hnktwf2dss89asBJJ6l85moJqs0OpNEOoiLapF0K-pUi5ruurSeuzR6X0vnfYNFA81LUcO184QBUbc4WMH5Jq7EHoblnlx3oAEh7voZNqK_EpmMW_WJs0kc-1sCq7gIkSqVGNDU8h_DVwJrC2OilJgpfE8uzyrvUPJskDy1WpXY4sGtvo1EjDrwTVJX8HdDonpnilxySYlQyHg7ZoNXnI7ieMCR-yeX9xdpm0U9HuFiWTwc3ZSPTyH4_BdM3-lCu8N85QFW' },
-              { id: 3, name: '골든 멸치 시리즈', desc: '자연의 황금빛 프리미엄 멸치', price: '58,000', tag: 'Limited', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBbfg5jErbXaIzmK-X2eBVMDy64u5OlmwM78kSsh7mX9SHY2rmFScrkq86LR1Ty1u2_NuEtHjMtL1d6rgbebKxdw5iEDTgKWs67QKdvPP3vIv9FJfsHJMad2ghmcOKGgpg1J3Y5VB6oJrDJFhturL_xbnMhCWxC5ygyKgLFVKQt8reyDgWUZOp4hU78ZrqWIHSkpCmm8HvyFlvF2oBHJS6l65-9-sm1BwdOe0bgQrEymM2j7pMFFaRFMbs0T6EDokHFffyu7RjfuCQb' },
-              { id: 4, name: '명품 영광 굴비', desc: '50년 전통의 법성포 해풍 건조', price: '129,000', tag: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCFPg7Sd2wfGYhxiTnpAhIUEHdiXfcVkQ9WUmIsLIpKLjOe3Px0bzpm4Xfu4tMwROVx1dC2OjATkIonnra25CK8_VYWZcN0tjXin-fBCXOeEOmSBJIaDN0Oy7uZM9xOJorGoGkcavmUK-yrpj1dTl7VEV6oP7xt8c-5vMLYH7rLO24s5SvQfrxFF0UVwPuPaaylbU_1ZtIKRwW_TCG2i07YPZ3Caact_BmL3O1F6dENYDn1qjU9syN1nkTad7Ik3m3b7CZNRJAO8fJc' },
-            ].map((product) => (
+            {displayProducts.map((product) => (
               <Link key={product.id} href={`/products/${product.id}`} className="group cursor-pointer">
                 <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-[#031a3a] mb-6 shadow-2xl shadow-black/50">
                   <div 
@@ -80,7 +87,7 @@ export default function HomePage() {
                 </div>
                 <h4 className="text-xl font-bold mb-1 group-hover:text-[#c59f59] transition-colors text-white">{product.name}</h4>
                 <p className="text-slate-500 text-sm mb-3">{product.desc}</p>
-                <p className="text-[#c59f59] font-bold">{product.price}원</p>
+                <p className="text-[#c59f59] font-bold">{product.priceText}원</p>
               </Link>
             ))}
           </div>
