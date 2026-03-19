@@ -113,21 +113,13 @@ export default function ProductDetailPage() {
               PREMIUM PRODUCT
             </h3>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{product.name}</h2>
-            <p className="text-slate-400 mb-8 leading-relaxed">{product.detail}</p>
+            <p className="text-slate-400 mb-8 leading-relaxed">{product.desc}</p>
 
             {/* Info Table */}
             <div className="border border-[#c59f59]/10 rounded-xl overflow-hidden mb-8">
-              <div className="flex border-b border-[#c59f59]/10">
-                <div className="w-28 bg-[#031a3a] px-4 py-3 text-sm font-bold text-[#c59f59]">원산지</div>
-                <div className="px-4 py-3 text-sm text-slate-300">{product.origin}</div>
-              </div>
-              <div className="flex border-b border-[#c59f59]/10">
-                <div className="w-28 bg-[#031a3a] px-4 py-3 text-sm font-bold text-[#c59f59]">중량</div>
-                <div className="px-4 py-3 text-sm text-slate-300">{product.weight}</div>
-              </div>
               <div className="flex">
                 <div className="w-28 bg-[#031a3a] px-4 py-3 text-sm font-bold text-[#c59f59]">배송</div>
-                <div className="px-4 py-3 text-sm text-slate-300">가락시장 산지직송 (무료배송)</div>
+                <div className="px-4 py-3 text-sm text-slate-300">가락시장(무료배송)</div>
               </div>
             </div>
 
