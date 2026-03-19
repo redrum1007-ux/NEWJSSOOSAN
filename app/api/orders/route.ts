@@ -3,7 +3,7 @@ import { readDB, writeDB } from '@/lib/db';
 import { Order } from '@/lib/types/order';
 
 // 샘플 시드 데이터
-const SEED_ORDERS: Order[] = [
+export const SEED_ORDERS: Order[] = [
   {
     id: 'ORD-20260318-001',
     createdAt: '2026-03-18T06:00:00Z',

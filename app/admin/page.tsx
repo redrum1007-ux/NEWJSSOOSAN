@@ -92,9 +92,9 @@ function OrdersTab() {
 
   const fetchOrders = async () => {
     setLoading(true);
-    const res = await fetch('/api/orders');
+    const res = await fetch('/api/orders', { cache: 'no-store' });
     const data = await res.json();
-    setOrders(data.orders);
+    setOrders(data.orders || []);
     setLoading(false);
   };
 
