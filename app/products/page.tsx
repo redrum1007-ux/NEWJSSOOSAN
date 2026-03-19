@@ -79,9 +79,8 @@ export default function ProductsPage() {
                 </div>
               </Link>
               <Link href={`/products/${product.id}`}>
-                <h4 className="text-xl font-bold mb-1 group-hover:text-[#c59f59] transition-colors text-white">{product.name}</h4>
+                <h4 className="text-xl font-bold mt-2 mb-3 group-hover:text-[#c59f59] transition-colors text-white">{product.name}</h4>
               </Link>
-              <p className="text-slate-500 text-sm mb-3">{product.desc}</p>
               <div className="flex items-center justify-between">
                 <p className="text-[#c59f59] font-bold text-lg">{product.priceText}원</p>
                 <button

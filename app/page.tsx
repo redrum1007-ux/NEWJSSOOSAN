@@ -86,8 +86,7 @@ export default function HomePage() {
                   )}
                 </div>
                 <h4 className="text-xl font-bold mb-1 group-hover:text-[#c59f59] transition-colors text-white">{product.name}</h4>
-                <p className="text-slate-500 text-sm mb-3">{product.desc}</p>
-                <p className="text-[#c59f59] font-bold">{product.priceText}원</p>
+                <p className="text-[#c59f59] font-bold mt-2">{product.priceText}원</p>
               </Link>
             ))}
           </div>
