@@ -1352,9 +1352,11 @@ export default function AdminPage() {
     { key: 'slides',  label: '슬라이드 관리', icon: 'slideshow' },
     { key: 'stats',   label: '방문자 통계', icon: 'monitoring' },
   ];
-  const handleLogin = (e: React.FormEvent) => {
+const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminId === 'honey1004' && adminPw === '8432818') {
+    const id = adminId.trim();
+    const pw = adminPw.trim();
+    if (id === 'honey1004' && pw === '8432818') {
       setIsLoggedIn(true);
     } else {
       alert('아이디 또는 비밀번호가 틀렸습니다.');
