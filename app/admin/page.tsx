@@ -1326,7 +1326,7 @@ export default function AdminPage() {
     const newProduct: Product = {
       id: String(Date.now()),
       name: formData.name,
-      desc: formData.description.replace(/<[^>]*>/g, '').substring(0, 50) + '...',
+      desc: formData.description.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').substring(0, 50) + '...',
       price: Number(formData.price),
       priceText: Number(formData.price).toLocaleString(),
       tag: formData.tag, // 'Best', 'Limited' 등 선택 가능하도록
