@@ -3,12 +3,15 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
 import { products as initialProducts, Product } from '@/lib/products';
 import { Order, OrderStatus } from '@/lib/types/order';
 import { Notice } from '@/lib/types/notice';
 import { CouponTemplate, Coupon } from '@/lib/types/coupon';
 import { UserPoint, PointHistory } from '@/lib/types/point';
 import { Slide } from '@/lib/types/slide';
+import { PRODUCT_CATEGORIES } from '@/lib/constants';
 
 // Quill을 SSR 없이 동적 로드
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
@@ -17,6 +20,7 @@ import 'react-quill-new/dist/quill.snow.css';
 type Tab = 'list' | 'register' | 'manage' | 'orders' | 'notices' | 'coupons' | 'points' | 'slides' | 'stats';
 
 interface ProductFormData {
+  id?: string;
   name: string;
   category: string;
   description: string;
@@ -26,15 +30,7 @@ interface ProductFormData {
   tag: string;
 }
 
-const CATEGORIES = [
-  '프리미엄 건어물',
-  '전복/해삼',
-  '멸치/새우',
-  '미역/다시마',
-  '굴비/생선',
-  '선물세트',
-  '기타',
-];
+const CATEGORIES = PRODUCT_CATEGORIES;
 
 const ORDER_STATUS_MAP: Record<OrderStatus, { label: string; color: string }> = {
   pending:   { label: '결제대기', color: 'bg-yellow-100 text-yellow-700' },
@@ -938,6 +934,23 @@ function SlidesTab() {
     loadSlides();
   };
 
+  const uploadSlideImage = async (e: React.ChangeEvent<HTMLInputElement>, key: 'bgImage' | 'couponImage') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setSaving(true);
+      const storageRef = ref(storage, `slides/${Date.now()}_${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(snapshot.ref);
+      f(key, url);
+    } catch (err) {
+      console.error('슬라이드 이미지 업로드 실패:', err);
+      alert('이미지 업로드에 실패했습니다. (CORS 설정이나 권한 오류일 수 있습니다.)');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const f = (key: keyof Slide, val: string | boolean | string[]) => setForm(prev => ({ ...prev, [key]: val }));
 
   const formPanel = (
@@ -970,11 +983,25 @@ function SlidesTab() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-bold text-gray-600 mb-1">배경 이미지 URL</label>
-          <input className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#c59f59]" placeholder="https://..." value={form.bgImage || ''} onChange={e => f('bgImage', e.target.value)} />
+          <div className="flex gap-2">
+            <input className="flex-1 border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#c59f59]" placeholder="https://..." value={form.bgImage || ''} onChange={e => f('bgImage', e.target.value)} />
+            <label className="bg-gray-100 hover:bg-gray-200 text-[#0A192F] font-bold px-3 py-2 rounded-lg cursor-pointer text-xs flex items-center justify-center shrink-0 transition-colors whitespace-nowrap">
+              <span className="material-symbols-outlined text-sm mr-1">upload</span>
+              업로드
+              <input type="file" className="hidden" accept="image/*" onChange={e => uploadSlideImage(e, 'bgImage')} />
+            </label>
+          </div>
         </div>
         <div>
           <label className="block text-xs font-bold text-gray-600 mb-1">쿠폰/보조 이미지 URL</label>
-          <input className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#c59f59]" placeholder="/welcome_coupon_10percent.png" value={form.couponImage || ''} onChange={e => f('couponImage', e.target.value)} />
+          <div className="flex gap-2">
+            <input className="flex-1 border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#c59f59]" placeholder="/welcome_coupon_10percent.png" value={form.couponImage || ''} onChange={e => f('couponImage', e.target.value)} />
+            <label className="bg-gray-100 hover:bg-gray-200 text-[#0A192F] font-bold px-3 py-2 rounded-lg cursor-pointer text-xs flex items-center justify-center shrink-0 transition-colors whitespace-nowrap">
+              <span className="material-symbols-outlined text-sm mr-1">upload</span>
+              업로드
+              <input type="file" className="hidden" accept="image/*" onChange={e => uploadSlideImage(e, 'couponImage')} />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -1212,6 +1239,7 @@ export default function AdminPage() {
 
   const [activeTab, setActiveTab] = useState<Tab>('register');
   const [productList, setProductList] = useState<Product[]>([]);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/products', { cache: 'no-store' })
@@ -1222,6 +1250,7 @@ export default function AdminPage() {
       .catch((err) => console.error('상품 목록 불러오기 오류:', err));
   }, []);
   const [formData, setFormData] = useState<ProductFormData>({
+    id: undefined,
     name: '',
     category: '프리미엄 건어물',
     description: '',
@@ -1240,7 +1269,7 @@ export default function AdminPage() {
 
   const quillWrapperRef = useRef<HTMLDivElement>(null);
 
-  // 다중 이미지 커스텀 핸들러
+  // 다중 이미지 커스텀 핸들러 (Firebase Storage 업로드)
   const imageHandler = useCallback(() => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
@@ -1263,22 +1292,24 @@ export default function AdminPage() {
       const quill = Quill.find(qlEditor.parentElement as Element) as any;
       if (!quill) return;
 
-
       for (const file of files) {
-        await new Promise<void>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const base64 = reader.result as string;
-            const range = quill.getSelection(true);
-            quill.insertEmbed(range.index, 'image', base64);
-            quill.setSelection(range.index + 1);
-            resolve();
-          };
-          reader.readAsDataURL(file);
-        });
+        try {
+          // Firebase Storage에 업로드
+          const storageRef = ref(storage, `products/detail_${Date.now()}_${file.name}`);
+          const snapshot = await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(snapshot.ref);
+          
+          const range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'image', url);
+          quill.setSelection(range.index + 1);
+        } catch (err) {
+          console.error('이미지 업로드 실패:', err);
+          alert('이미지 업로드에 실패했습니다.');
+        }
       }
     };
   }, []);
+
 
   const quillModules = useMemo(() => ({
     toolbar: {
@@ -1323,20 +1354,37 @@ export default function AdminPage() {
     }
     setIsSubmitting(true);
 
-    const newProduct: Product = {
-      id: String(Date.now()),
-      name: formData.name,
-      desc: formData.description.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').substring(0, 50) + '...',
-      price: Number(formData.price),
-      priceText: Number(formData.price).toLocaleString(),
-      tag: formData.tag, // 'Best', 'Limited' 등 선택 가능하도록
-      img: formData.imagePreview,
-      detail: formData.description, // Quill의 HTML 태그 그대로 저장
-      origin: '국내산', // 임시
-      weight: '-', // 임시
-    };
-
     try {
+      // 이미지를 Firebase Storage에 업로드하고 URL 획득
+      let imageUrl = formData.imagePreview;
+      if (formData.image) {
+        try {
+          const productId = String(Date.now());
+          const storageRef = ref(storage, `products/${productId}_${formData.image.name}`);
+          const snapshot = await uploadBytes(storageRef, formData.image);
+          imageUrl = await getDownloadURL(snapshot.ref);
+        } catch (uploadError) {
+          console.error('Storage Upload Error:', uploadError);
+          alert('이미지 업로드에 실패했습니다. (CORS 설정이나 권한 오류일 수 있습니다.) \n구글 클라우드 콘솔에서 Firebase Storage CORS 설정을 확인해주세요.');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      const newProduct: Product = {
+        id: formData.id || String(Date.now()),
+        name: formData.name,
+        category: formData.category,
+        desc: formData.description.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').substring(0, 50) + '...',
+        price: Number(formData.price),
+        priceText: Number(formData.price).toLocaleString(),
+        tag: formData.tag,
+        img: imageUrl, // Storage URL (base64 아님)
+        detail: formData.description,
+        origin: '국내산',
+        weight: '-',
+      };
+
+      console.log('Final product info to send:', newProduct);
       const res = await fetch('/api/products', {
         method: 'POST',
         headers: {
@@ -1345,34 +1393,51 @@ export default function AdminPage() {
         body: JSON.stringify(newProduct),
       });
 
+      console.log('API Response Status:', res.status);
       if (res.ok) {
-        setProductList((prev) => [...prev, newProduct]);
-        setSuccessMessage(`"${formData.name}" 상품이 등록되었습니다!`);
-        setFormData({ name: '', category: '프리미엄 건어물', description: '', price: '', image: null, imagePreview: '', tag: '' });
+        const result = await res.json();
+        console.log('Register Success Result:', result);
+        if (formData.id) {
+          setProductList((prev) => prev.map((p) => p.id === formData.id ? newProduct : p));
+          setSuccessMessage(`"${formData.name}" 상품이 수정되었습니다!`);
+        } else {
+          setProductList((prev) => [...prev, newProduct]);
+          setSuccessMessage(`"${formData.name}" 상품이 등록되었습니다!`);
+        }
+        setFormData({ id: undefined, name: '', category: '프리미엄 건어물', description: '', price: '', image: null, imagePreview: '', tag: '' });
       } else {
-        alert('상품 등록에 실패했습니다.');
+        const errData = await res.json();
+        console.error('Register API Error Details:', errData);
+        alert(`상품 등록에 실패했습니다: ${errData.error || '알 수 없는 오류'}`);
       }
     } catch (e) {
-      console.error(e);
-      alert('상품 등록 중 오류가 발생했습니다.');
+      console.error('handleSubmit error:', e);
+      alert('상품 등록 중 오류가 발생했습니다. 이미지 크기를 확인해주세요.');
     }
 
     setIsSubmitting(false);
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('정말 삭제하시겠습니까?')) {
-      try {
-        const res = await fetch(`/api/products?id=${id}`, { method: 'DELETE' });
-        if (res.ok) {
-          setProductList((prev) => prev.filter((p) => p.id !== id));
-        } else {
-          alert('삭제에 실패했습니다.');
-        }
-      } catch (error) {
-        console.error('삭제 오류:', error);
+  const handleDelete = async () => {
+    if (!deleteConfirmId) return;
+    const id = deleteConfirmId;
+    console.log('Execute delete for id:', id);
+    try {
+      const res = await fetch(`/api/products?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setProductList((prev) => prev.filter((p) => p.id !== id));
+        window.alert('상품이 성공적으로 삭제되었습니다.');
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('API Error:', errorData);
+        window.alert(`삭제에 실패했습니다. (API 오류)\n${errorData.error || ''}`);
       }
+    } catch (error) {
+      console.error('삭제 처리 중 오류:', error);
+      window.alert('삭제 처리 중 오류가 발생했습니다. 브라우저 콘솔을 확인해주세요.');
+    } finally {
+      setDeleteConfirmId(null);
     }
   };
 
@@ -1516,7 +1581,7 @@ const handleLogin = (e: React.FormEvent) => {
         {/* ===== 탭 2: 상품 등록 ===== */}
         {activeTab === 'register' && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 md:p-10">
-            <h2 className="text-xl font-bold text-[#0A192F] mb-8">상품 등록</h2>
+            <h2 className="text-xl font-bold text-[#0A192F] mb-8">{formData.id ? '상품 수정' : '상품 등록'}</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-bold text-gray-800 mb-2">상품명 <span className="text-red-500">*</span></label>
@@ -1530,7 +1595,7 @@ const handleLogin = (e: React.FormEvent) => {
                   <select value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm appearance-none bg-white focus:ring-2 focus:ring-[#0A192F] focus:border-[#0A192F] outline-none transition-all cursor-pointer">
-                    {CATEGORIES.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
+                    {CATEGORIES.map((cat: string) => (<option key={cat} value={cat}>{cat}</option>))}
                   </select>
                   <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
                 </div>
@@ -1583,10 +1648,10 @@ const handleLogin = (e: React.FormEvent) => {
               <div className="pt-4 space-y-3">
                 <button type="submit" disabled={isSubmitting}
                   className="w-full bg-[#0A192F] hover:bg-[#112240] text-white font-bold py-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                  {isSubmitting ? (<><span className="animate-spin material-symbols-outlined text-lg">progress_activity</span>등록 중...</>) : '상품 등록하기'}
+                  {isSubmitting ? (<><span className="animate-spin material-symbols-outlined text-lg">progress_activity</span>저장 중...</>) : formData.id ? '상품 수정하기' : '상품 등록하기'}
                 </button>
                 <button type="button"
-                  onClick={() => setFormData({ name: '', category: '프리미엄 건어물', description: '', price: '', image: null, imagePreview: '', tag: '' })}
+                  onClick={() => setFormData({ id: undefined, name: '', category: '프리미엄 건어물', description: '', price: '', image: null, imagePreview: '', tag: '' })}
                   className="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 rounded-lg transition-all">취소</button>
               </div>
             </form>
@@ -1630,11 +1695,12 @@ const handleLogin = (e: React.FormEvent) => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => {
-                            setFormData({ name: product.name, category: '프리미엄 건어물', description: product.detail, price: String(product.price), image: null, imagePreview: product.img, tag: product.tag });
+                          <button type="button" onClick={(e) => {
+                            e.stopPropagation();
+                            setFormData({ id: product.id, name: product.name, category: product.category || '프리미엄 건어물', description: product.detail, price: String(product.price), image: null, imagePreview: product.img, tag: product.tag });
                             setActiveTab('register');
-                          }} className="text-xs text-[#0A192F] border border-[#0A192F] px-3 py-1.5 rounded-md hover:bg-[#0A192F] hover:text-white transition-all">수정</button>
-                          <button onClick={() => handleDelete(product.id)} className="text-xs text-red-500 border border-red-300 px-3 py-1.5 rounded-md hover:bg-red-500 hover:text-white transition-all">삭제</button>
+                          }} className="text-xs text-[#0A192F] border border-[#0A192F] px-4 py-2 rounded-md hover:bg-[#0A192F] hover:text-white transition-all whitespace-nowrap font-bold">수정</button>
+                          <button type="button" onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(product.id); }} className="text-xs text-red-500 border border-red-300 px-4 py-2 rounded-md hover:bg-red-500 hover:text-white transition-all whitespace-nowrap font-bold">삭제</button>
                         </div>
                       </td>
                     </tr>
@@ -1668,6 +1734,22 @@ const handleLogin = (e: React.FormEvent) => {
 
         {/* ===== 탭 9: 방문자 통계 ===== */}
         {activeTab === 'stats' && <StatsTab />}
+        {/* ===== 상품 삭제 확인 모달 ===== */}
+        {deleteConfirmId && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white p-6 rounded-2xl shadow-2xl w-80 text-center animate-slide-in">
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="material-symbols-outlined text-3xl">delete_forever</span>
+              </div>
+              <h3 className="text-xl font-bold text-[#0A192F] mb-2">상품 삭제</h3>
+              <p className="text-sm text-gray-500 mb-8 leading-relaxed">정말 이 상품을 삭제하시겠습니까?<br/>삭제 후에는 복구할 수 없습니다.</p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteConfirmId(null)} className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-200 transition-colors">취소</button>
+                <button onClick={handleDelete} className="flex-1 py-3 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/30">삭제하기</button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       <style jsx global>{`

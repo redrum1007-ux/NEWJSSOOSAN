@@ -6,6 +6,8 @@ export interface CartItem {
   price: number;
   quantity: number;
   imageUrl: string;
+  category?: string; // 카테고리 (면세 판별에 사용)
+  taxFree?: boolean; // true: 면세 상품 (1차 수산물/건어물)
 }
 
 interface CartStore {

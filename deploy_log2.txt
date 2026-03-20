@@ -1,0 +1,167 @@
+﻿[96m[1m??[22m[39m
+[96m[1mNetlify Build                                                 [22m[39m
+[96m[1m????????????????????????????????????????????????????????????????[22m[39m
+[36m[1m??[22m[39m
+[36m[1m??Version[22m[39m
+  @netlify/build 35.8.3
+[36m[1m??[22m[39m
+[36m[1m??Flags[22m[39m
+  accountId: 698aa293a3bb960a01b62958
+  deployId: 69bcdef0cff5b2b7e6cac090
+[36m[1m??[22m[39m
+[36m[1m??Current directory[22m[39m
+  E:\吏꾩꽦?섏궛 ?덊럹?댁? ??jinsung-nature-food
+[36m[1m??[22m[39m
+[36m[1m??Config file[22m[39m
+  E:\吏꾩꽦?섏궛 ?덊럹?댁? ??jinsung-nature-food\netlify.toml
+[36m[1m??[22m[39m
+[36m[1m??Context[22m[39m
+  production
+[36m[1m??[22m[39m
+[36m[1m??Using Next.js Runtime - v5.15.9[22m[39m
+[96m[1m??[22m[39m
+[96m[1mbuild.command from netlify.toml                               [22m[39m
+[96m[1m????????????????????????????????????????????????????????????????[22m[39m
+??[36m$ npm run build[39m
+
+> jinsung-nature-food@0.1.0 build
+> next build
+
+??Next.js 16.1.7 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+node.exe : (node:10084) [MODUL
+E_TYPELESS_PACKAGE_JSON] Warni
+ng: Module type of file:///E:/
+%EC%A7%84%EC%84%B1%EC%88%98%EC
+%82%B0%20%ED%99%88%ED%8E%98%EC
+%9D%B4%EC%A7%80%20%EB%89%B4/ji
+nsung-nature-food/tailwind.con
+fig.ts?id=1773985523980 is not
+ specified and it doesn't pars
+e as CommonJS.
+위치 줄:1 문자:1
++ & "C:\Program Files\nodejs/n
+ode.exe" "C:\Program Files\nod
+ejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: ((node:100  
+  84) [M...se as CommonJS.:   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+Reparsing as ES module because
+ module syntax was detected. T
+his incurs a performance overh
+ead.
+To eliminate this warning, add
+ "type": "module" to E:\吏꾩꽦?섏궛
+ ?덊럹?댁? ??jinsung-nature-food\
+package.json.
+(Use `node --trace-warnings ..
+.` to show where the warning w
+as created)
+??Compiled successfully in 4.5s
+  Running TypeScript ...
+  Collecting page data using 19 workers ...
+Firebase Admin initialized.
+  Generating static pages using 19 workers (0/30) ...
+  Generating static pages using 19 workers (7/30) 
+  Generating static pages using 19 workers (14/30) 
+Firebase Admin initialized.
+  Generating static pages using 19 workers (22/30) 
+??Generating static pages using 19 workers (30/30) in 226.4ms
+  Finalizing page optimization ...
+
+Route (app)
+????/
+????/_not-found
+????/about
+????/admin
+??? /api/coupon-templates
+??? /api/coupon-templates/[id]
+??? /api/coupon-templates/seed
+??? /api/coupons
+??? /api/coupons/[id]/use
+??? /api/coupons/validate
+??? /api/inquiries
+??? /api/inquiries/[id]
+??? /api/notices
+??? /api/notices/[id]
+??? /api/orders
+??? /api/orders/[id]
+??? /api/payments/success
+??? /api/points
+??? /api/points/admin
+??? /api/points/admin/history
+??? /api/products
+??? /api/seed-firestore
+??? /api/slides
+??? /api/slides/[id]
+??? /api/slides/all
+??? /api/stats/visit
+????/auth
+????/cart
+????/inquiry
+????/mypage
+????/privacy
+????/products
+??? /products/[id]
+????/shipping-policy
+????/success
+????/terms
+
+
+?? (Static)   prerendered as static content
+?  (Dynamic)  server-rendered on demand
+
+??[90m(build.command completed in 10.3s)[39m
+[91m[1m??[22m[39m
+[91m[1mPlugin "@netlify/plugin-nextjs" internal error                [22m[39m
+[91m[1m????????????????????????????????????????????????????????????????[22m[39m
+??  [31m[1mError message[22m[39m
+  Error: EPERM: operation not permitted, symlink 'E:\吏꾩꽦?섏궛 ?덊럹?댁? ??jinsung-nature-food\node_modules\firebase-admin' -> 'E:\吏꾩꽦?섏궛 ?덊럹?댁? ??jinsung-nature-food\.netlify\functions-internal\___netlify-server-handler\.next\node_modules\firebase-admin-a14c8a5423a75469'
+??  [31m[1mPlugin details[22m[39m
+  Package:        @netlify/plugin-nextjs
+  Version:        5.15.9
+  Repository:     git+https://github.com/opennextjs/opennextjs-netlify.git
+  npm link:       https://www.npmjs.com/package/@netlify/plugin-nextjs
+  Report issues:  https://github.com/opennextjs/opennextjs-netlify/issues
+??  [31m[1mError location[22m[39m
+  In "onBuild" event in "@netlify/plugin-nextjs" from netlify.toml
+      at async symlink (node:internal/fs/promises:999:10)
+      at async copyDir (node:internal/fs/cp/cp:330:19)
+      at async mkDirAndCopy (node:internal/fs/cp/cp:319:3)
+      at async file:///E:/%EC%A7%84%EC%84%B1%EC%88%98%EC%82%B0%20%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%20%EB%89%B4/jinsung-nature-food/.netlify/plugins/node_modules/@netlify/plugin-nextjs/dist/build/content/server.js:126:7
+      at async copyNextServerCode (file:///E:/%EC%A7%84%EC%84%B1%EC%88%98%EC%82%B0%20%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%20%EB%89%B4/jinsung-nature-food/.netlify/plugins/node_modules/@netlify/plugin-nextjs/dist/build/content/server.js:45:3)
+      at async file:///E:/%EC%A7%84%EC%84%B1%EC%88%98%EC%82%B0%20%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%20%EB%89%B4/jinsung-nature-food/.netlify/plugins/node_modules/@netlify/plugin-nextjs/dist/build/functions/server.js:126:5
+      at async createServerHandler (file:///E:/%EC%A7%84%EC%84%B1%EC%88%98%EC%82%B0%20%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%20%EB%89%B4/jinsung-nature-food/.netlify/plugins/node_modules/@netlify/plugin-nextjs/dist/build/functions/server.js:124:3)
+      at async Promise.all (index 3)
+      at async file:///E:/%EC%A7%84%EC%84%B1%EC%88%98%EC%82%B0%20%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%20%EB%89%B4/jinsung-nature-food/.netlify/plugins/node_modules/@netlify/plugin-nextjs/dist/index.js:82:5
+      at async onBuild (file:///E:/%EC%A7%84%EC%84%B1%EC%88%98%EC%82%B0%20%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%20%EB%89%B4/jinsung-nature-food/.netlify/plugins/node_modules/@netlify/plugin-nextjs/dist/index.js:70:3)
+??  [31m[1mError properties[22m[39m
+  {
+    errno: [33m-4048[39m,
+    code: [32m'EPERM'[39m,
+    syscall: [32m'symlink'[39m,
+    path: [32m'E:\\吏꾩꽦?섏궛 ?덊럹?댁? ??\jinsung-nature-food\\node_modules\\firebase-admin'[39m,
+    dest: [32m'E:\\吏꾩꽦?섏궛 ?덊럹?댁? ??\jinsung-nature-food\\.netlify\\functions-internal\\___netlify-server-handler\\.next\\node_modules\\firebase-admin-a14c8a5423a75469'[39m
+  }
+??  [31m[1mResolved config[22m[39m
+  build:
+    command: npm run build
+    commandOrigin: config
+    publish: E:\吏꾩꽦?섏궛 ?덊럹?댁? ??jinsung-nature-food\.next
+    publishOrigin: config
+  plugins:
+    - inputs: {}
+      origin: config
+      package: "@netlify/plugin-nextjs"
+ 쨩   Error: Error while runnin
+g build

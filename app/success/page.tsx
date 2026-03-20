@@ -18,6 +18,7 @@ function SuccessContent() {
 
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [earnedPoints, setEarnedPoints] = useState(0);
+  const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!paymentKey || !orderId || !amount) {
@@ -30,11 +31,21 @@ function SuccessContent() {
         const res = await fetch('/api/payments/success', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentKey, orderId, amount: Number(amount) }),
+          // taxFreeAmount는 success URL 쿼리로 전달받아 숫자로 변환
+          body: JSON.stringify({
+            paymentKey,
+            orderId,
+            amount: Number(amount),
+            taxFreeAmount: Number(searchParams.get('taxFreeAmount') ?? 0),
+          }),
         });
 
         if (res.ok) {
+          const data = await res.json();
           clearCart();
+
+          // ✅ 영수증 URL 저장
+          if (data.receiptUrl) setReceiptUrl(data.receiptUrl);
 
           // ✅ 구매 금액의 1% 포인트 자동 적립
           if (user) {
@@ -127,6 +138,16 @@ function SuccessContent() {
       )}
 
       <div className="flex flex-col gap-3 mt-2 border-t border-gray-100 pt-8">
+        {receiptUrl && (
+          <a
+            href={receiptUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full text-center border border-gray-300 text-gray-700 px-6 py-3 rounded hover:bg-gray-50 transition font-medium text-sm"
+          >
+            🧾 영수증 보기
+          </a>
+        )}
         <Link href="/" className="bg-deep-navy text-white px-6 py-4 rounded hover:bg-navy-light transition font-bold shadow-sm">
           쇼핑 계속하기
         </Link>

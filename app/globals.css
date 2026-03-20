@@ -34,13 +34,33 @@ body {
   /* 기본 컬러 리셋 (화이트 배경 섹션이므로) */
   color: #1a1a1a;
   line-height: 1.8;
-  word-break: keep-all;
+  width: 100%;
+  max-width: 100%;
+  overflow-wrap: break-word; /* 긴 단어 강제 줄바꿈 */
+  word-break: normal;        /* 한글 보존을 위해 기본값 */
+}
+
+/* 내부 모든 엘리먼트가 100%를 넘지 않게 강제 */
+.rich-text-content * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-wrap: break-word !important;
 }
 
 /* 인라인 스타일 div (프리미엄 템플릿)는 그대로 유지 */
 .rich-text-content div,
 .rich-text-content section {
   box-sizing: border-box;
+}
+
+/* 이미지 및 비디오 100% 보장 */
+.rich-text-content img,
+.rich-text-content video,
+.rich-text-content iframe {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+  margin: 1rem auto;
 }
 
 /* Quill이 생성하는 일반 텍스트 태그 스타일링 */

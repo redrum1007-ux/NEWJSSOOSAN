@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
-import { Trash2, CreditCard, Tag, CheckCircle, Star } from 'lucide-react';
+import { Trash2, CreditCard, Tag, CheckCircle, Star, Ticket } from 'lucide-react';
 import Link from 'next/link';
+import { Coupon } from '@/lib/types/coupon';
+import { TAX_FREE_CATEGORIES } from '@/lib/constants';
 
 const TOSS_CLIENT_KEY = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
 
@@ -21,13 +23,14 @@ export default function CartPage() {
   const { user } = useAuthStore();
   const totalPrice = getTotalPrice();
 
-  const [orderInfo, setOrderInfo] = useState({ customerName: '', customerEmail: '', address: '' });
+  const [orderInfo, setOrderInfo] = useState({ customerName: '', customerEmail: '', phone: '', address: '' });
 
   // 쿠폰 상태
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [couponError, setCouponError] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
+  const [userCoupons, setUserCoupons] = useState<Coupon[]>([]);
 
   // 포인트 상태
   const [userPoints, setUserPoints] = useState(0);
@@ -39,29 +42,37 @@ export default function CartPage() {
   const couponDiscount = appliedCoupon?.discount ?? 0;
   const finalPrice = Math.max(totalPrice - couponDiscount - appliedPoint, 0);
 
-  // 포인트 잔액 로드
+  // 포인트 및 쿠폰 로드
   useEffect(() => {
     if (!user) return;
-    fetch(`/api/points?userId=${user.uid}`)
-      .then((r) => r.json())
-      .then((data) => setUserPoints(data.total ?? 0))
-      .catch(() => {});
+    Promise.all([
+      fetch(`/api/points?userId=${user.uid}`).then((r) => r.json()),
+      fetch(`/api/coupons?userId=${user.uid}`).then((r) => r.json())
+    ])
+    .then(([pointData, couponData]) => {
+      setUserPoints(pointData.total ?? 0);
+      if (couponData.coupons) {
+        setUserCoupons(couponData.coupons.filter((c: Coupon) => !c.used && new Date(c.expiresAt) > new Date()));
+      }
+    })
+    .catch(() => {});
   }, [user]);
 
   // 쿠폰 관련
-  const handleApplyCoupon = async () => {
+  const handleApplyCoupon = async (codeToApply?: string) => {
+    const code = codeToApply || couponCode;
     if (!user) { setCouponError('쿠폰을 사용하려면 로그인이 필요합니다.'); return; }
-    if (!couponCode.trim()) { setCouponError('쿠폰 코드를 입력해주세요.'); return; }
+    if (!code.trim()) { setCouponError('쿠폰 코드를 입력해주세요.'); return; }
     setCouponLoading(true); setCouponError('');
     try {
       const res = await fetch('/api/coupons/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: couponCode.trim().toUpperCase(), userId: user.uid, orderAmount: totalPrice }),
+        body: JSON.stringify({ code: code.trim().toUpperCase(), userId: user.uid, orderAmount: totalPrice }),
       });
       const data = await res.json();
-      if (!res.ok) { setCouponError(data.error || '쿠폰 적용 실패'); setAppliedCoupon(null); }
-      else { setAppliedCoupon({ id: data.coupon.id, code: data.coupon.code, name: data.coupon.name, discount: data.discount }); setCouponError(''); }
+      if (!res.ok) { setCouponError(data.error || '쿠폰 적용 실패'); setAppliedCoupon(null); setCouponCode(''); }
+      else { setAppliedCoupon({ id: data.coupon.id, code: data.coupon.code, name: data.coupon.name, discount: data.discount }); setCouponError(''); setCouponCode(code); }
     } catch { setCouponError('쿠폰 확인 중 오류가 발생했습니다.'); }
     finally { setCouponLoading(false); }
   };
@@ -85,13 +96,35 @@ export default function CartPage() {
 
   // 결제
   const handlePayment = async () => {
-    if (!orderInfo.customerName || !orderInfo.address) {
-      alert('배송을 위해 이름과 주소를 정확히 입력해주세요.'); return;
+    if (!orderInfo.customerName || !orderInfo.address || !orderInfo.phone) {
+      alert('배송을 위해 이름, 연락처, 주소를 정확히 입력해주세요.'); return;
     }
     try {
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
       const orderId = `ORDER_${new Date().getTime()}_${Math.random().toString(36).substring(2, 9)}`;
       const orderName = items.length > 1 ? `${items[0].name} 외 ${items.length - 1}건` : items[0].name;
+
+      // ✅ 면세 금액 산정: 1차 수산물 / 건어물 카테고리만 합산
+      const taxFreeItemsTotal = items.reduce((sum, item) => {
+        const isTaxFree =
+          item.taxFree === true ||
+          (item.category && TAX_FREE_CATEGORIES.includes(item.category));
+        return isTaxFree ? sum + item.price * item.quantity : sum;
+      }, 0);
+
+      // 할인이 적용된 만큼 taxFreeAmount도 비례 감소
+      const discountRatio = totalPrice > 0 ? finalPrice / totalPrice : 1;
+      const taxFreeAmount = Math.floor(taxFreeItemsTotal * discountRatio);
+
+      // 테스트 시 파라미터 확인용 콘솔로그
+      console.log('💳 [토스 결제 파라미터 확인]', {
+        orderId,
+        amount: finalPrice,
+        taxFreeAmount,
+        taxableAmount: finalPrice - taxFreeAmount,
+        orderName,
+        items: items.map(i => ({ name: i.name, price: i.price, qty: i.quantity, category: i.category, taxFree: i.taxFree })),
+      });
 
       if (appliedCoupon) {
         await fetch(`/api/coupons/${appliedCoupon.id}/use`, {
@@ -114,9 +147,12 @@ export default function CartPage() {
       }
 
       await tossPayments.requestPayment('카드', {
-        amount: finalPrice, orderId, orderName,
+        amount: finalPrice,
+        orderId,
+        orderName,
         customerName: orderInfo.customerName,
-        successUrl: `${window.location.origin}/success`,
+        taxFreeAmount, // ✅ 면세금액 파라미터 추가
+        successUrl: `${window.location.origin}/success?taxFreeAmount=${taxFreeAmount}`,
         failUrl: `${window.location.origin}/fail`,
       });
     } catch (error) {
@@ -165,7 +201,7 @@ export default function CartPage() {
           {/* 쿠폰 입력 */}
           <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold text-deep-navy mb-4 flex items-center gap-2">
-              <Tag size={20} className="text-[#c59f59]" /> 쿠폰 적용
+              <Tag size={20} className="text-[#c59f59]" /> 쿠폰 활용
             </h2>
             {appliedCoupon ? (
               <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-4 py-3">
@@ -176,22 +212,59 @@ export default function CartPage() {
                     <p className="text-sm text-green-600">-{appliedCoupon.discount.toLocaleString()}원 할인 적용</p>
                   </div>
                 </div>
-                <button onClick={handleRemoveCoupon} className="text-sm text-red-400 hover:text-red-600 font-medium">제거</button>
+                <button onClick={handleRemoveCoupon} className="text-sm text-red-400 hover:text-red-600 font-medium whitespace-nowrap px-2">취소</button>
               </div>
             ) : (
-              <div className="flex gap-3">
-                <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
-                  placeholder="쿠폰 코드 입력 (예: WELCOME10)"
-                  className="flex-1 border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#c59f59] outline-none" />
-                <button onClick={handleApplyCoupon} disabled={couponLoading}
-                  className="bg-[#c59f59] hover:bg-[#b08d4a] text-white font-bold px-6 py-2.5 rounded-md text-sm disabled:opacity-60">
-                  {couponLoading ? '확인 중...' : '적용'}
-                </button>
+              <div className="flex flex-col gap-3 border border-[#c59f59]/30 rounded-lg p-4 bg-amber-50/30">
+                {user && userCoupons.length > 0 && (
+                  <div className="mb-2">
+                    <label className="block text-sm font-bold text-[#0A192F] mb-2 flex items-center gap-1.5">
+                      <Ticket size={16} className="text-[#c59f59]" /> 보유 쿠폰 목록에서 선택
+                    </label>
+                    <select
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val) handleApplyCoupon(val);
+                      }}
+                      className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm text-gray-700 focus:ring-2 focus:ring-[#c59f59] outline-none bg-white font-medium cursor-pointer"
+                      disabled={couponLoading}
+                      value={couponCode}
+                    >
+                      <option value="">보유하신 쿠폰을 선택하세요 ({userCoupons.length}장 사용 가능)</option>
+                      {userCoupons.map((c) => {
+                        const isUsable = totalPrice >= c.minOrderAmount;
+                        const text = isUsable 
+                          ? `${c.name} (${c.type === 'percent' ? c.value + '% 할인' : c.value.toLocaleString() + '원 할인'})`
+                          : `${c.name} (최소주문미달: ${c.minOrderAmount.toLocaleString()}원 이상 조건)`;
+                        return (
+                          <option key={c.id} value={isUsable ? c.code : ''} disabled={!isUsable}>
+                            {text}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                )}
+                
+                <div className="relative pt-1">
+                  {user && userCoupons.length > 0 && (
+                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-50 px-3 text-xs text-[#c59f59] font-bold rounded-full">또는 직접 입력</div>
+                  )}
+                  <div className="flex gap-3">
+                    <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon(couponCode)}
+                      placeholder="쿠폰 코드 직접 입력 (예: WELCOME10)"
+                      className="flex-1 border border-gray-300 rounded-md px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-[#c59f59] outline-none" />
+                    <button onClick={() => handleApplyCoupon(couponCode)} disabled={couponLoading}
+                      className="bg-[#c59f59] w-24 hover:bg-[#b08d4a] text-white font-bold px-6 py-2.5 rounded-md text-sm disabled:opacity-60 transition-colors whitespace-nowrap">
+                      {couponLoading ? '확인 중' : '적용'}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
-            {couponError && <p className="text-red-500 text-sm mt-2">{couponError}</p>}
-            {!user && <p className="text-gray-400 text-xs mt-2">* 쿠폰을 사용하려면 로그인이 필요합니다.</p>}
+            {couponError && <p className="text-red-500 text-sm mt-3 font-medium bg-red-50 p-2 rounded">{couponError}</p>}
+            {!user && <p className="text-gray-400 text-xs mt-3">* 쿠폰을 사용하려면 로그인이 필요합니다.</p>}
           </section>
 
           {/* 포인트 사용 */}
@@ -222,7 +295,7 @@ export default function CartPage() {
                   <div className="flex gap-3">
                     <input type="number" value={usePointInput} onChange={(e) => setUsePointInput(e.target.value)}
                       placeholder={`최대 ${Math.min(userPoints, totalPrice - couponDiscount - 1).toLocaleString()}P`}
-                      className="flex-1 border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:ring-2 focus:ring-amber-400 outline-none" />
+                      className="flex-1 border border-gray-300 rounded-md px-4 py-2.5 text-sm text-gray-900 focus:ring-2 focus:ring-amber-400 outline-none" />
                     <button onClick={handleUseAllPoint}
                       className="border border-amber-400 text-amber-600 font-bold px-4 py-2.5 rounded-md text-sm hover:bg-amber-50">
                       전체 사용
@@ -246,14 +319,20 @@ export default function CartPage() {
             <h2 className="text-xl font-bold text-deep-navy mb-4">배송지 정보</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">받으시는 분</label>
-                <input type="text" className="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#c59f59] p-2 border outline-none"
+                <label className="block text-sm font-medium text-gray-700 mb-1">받으시는 분 <span className="text-red-400">*</span></label>
+                <input type="text" className="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#c59f59] p-2 border outline-none text-gray-900"
                   placeholder="홍길동" value={orderInfo.customerName}
                   onChange={(e) => setOrderInfo({ ...orderInfo, customerName: e.target.value })} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">배송지 주소</label>
-                <input type="text" className="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#c59f59] p-2 border outline-none"
+                <label className="block text-sm font-medium text-gray-700 mb-1">연락처 <span className="text-red-400">*</span></label>
+                <input type="tel" className="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#c59f59] p-2 border outline-none text-gray-900"
+                  placeholder="010-0000-0000 (배송 문의 연락처)" value={orderInfo.phone}
+                  onChange={(e) => setOrderInfo({ ...orderInfo, phone: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">배송지 주소 <span className="text-red-400">*</span></label>
+                <input type="text" className="w-full border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-[#c59f59] p-2 border outline-none text-gray-900"
                   placeholder="서울특별시 송파구 가락동..." value={orderInfo.address}
                   onChange={(e) => setOrderInfo({ ...orderInfo, address: e.target.value })} />
               </div>

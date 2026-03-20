@@ -9,6 +9,7 @@ export interface Product {
   detail: string;
   origin: string;
   weight: string;
+  category?: string;
 }
 
 export const products: Product[] = [
@@ -23,6 +24,7 @@ export const products: Product[] = [
     detail: '청정 완도 바다에서 직접 양식한 최상급 대형 전복입니다. 살이 도톰하고 쫄깃한 식감이 일품이며, 전복죽, 전복구이, 전복찜 등 다양한 요리에 활용 가능합니다. 신선한 상태로 산지 직송하여 최고의 맛을 보장합니다.',
     origin: '전라남도 완도군',
     weight: '1kg (약 8-10마리)',
+    category: '김',
   },
   {
     id: '2',
@@ -35,6 +37,7 @@ export const products: Product[] = [
     detail: '진성네이처푸드의 베스트 상품을 한데 모은 프리미엄 선물 세트입니다. 고급 보자기 포장으로 명절, 기념일, 비즈니스 선물로 최적입니다. 전복, 멸치, 다시마, 미역 등 엄선된 건어물을 정성껏 구성했습니다.',
     origin: '국내산 (완도, 기장, 진도)',
     weight: '종합 세트 (약 2.5kg)',
+    category: '선물세트',
   },
   {
     id: '3',
@@ -47,6 +50,7 @@ export const products: Product[] = [
     detail: '진도산 최상급 멸치를 엄선하여 자연 건조 방식으로 만든 황금빛 프리미엄 멸치입니다. 깊고 진한 국물맛을 자랑하며, 볶음멸치, 멸치국수, 다시용으로 최적입니다. 한정 수량 생산으로 품질을 보장합니다.',
     origin: '전라남도 진도군',
     weight: '500g',
+    category: '멸치/새우',
   },
   {
     id: '4',
@@ -59,6 +63,7 @@ export const products: Product[] = [
     detail: '법성포의 청정 해풍으로 자연 건조한 명품 영광 굴비입니다. 50년 전통의 장인 기술로 만들어 특유의 깊은 감칠맛과 짭조름한 풍미가 일품입니다. 명절 선물, 제수용으로 가장 사랑받는 최고급 굴비입니다.',
     origin: '전라남도 영광군 법성포',
     weight: '10마리 (약 2kg)',
+    category: '굴비/생선',
   },
 ];
 

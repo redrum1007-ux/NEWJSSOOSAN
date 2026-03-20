@@ -5,24 +5,30 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Star, TrendingUp, TrendingDown, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { PointHistory } from '@/lib/types/point';
+import { Coupon } from '@/lib/types/coupon';
 import AuthControls from '@/components/AuthControls';
 
 export default function MyPage() {
   const { user, loading } = useAuthStore();
   const [totalPoints, setTotalPoints] = useState(0);
   const [history, setHistory] = useState<PointHistory[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
     if (!user) { setFetching(false); return; }
-    fetch(`/api/points?userId=${user.uid}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setTotalPoints(data.total ?? 0);
-        setHistory(data.history ?? []);
-      })
-      .catch(() => {})
-      .finally(() => setFetching(false));
+    
+    Promise.all([
+      fetch(`/api/points?userId=${user.uid}`).then((r) => r.json()),
+      fetch(`/api/coupons?userId=${user.uid}`).then((r) => r.json())
+    ])
+    .then(([pointData, couponData]) => {
+      setTotalPoints(pointData.total ?? 0);
+      setHistory(pointData.history ?? []);
+      setCoupons(couponData.coupons ?? []);
+    })
+    .catch(console.error)
+    .finally(() => setFetching(false));
   }, [user]);
 
   if (loading || fetching) {
@@ -76,6 +82,59 @@ export default function MyPage() {
             <p className="text-sm font-bold text-gray-800">{item.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* 내 쿠폰함 */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+          <h2 className="font-bold text-[#0A192F] flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#c59f59]">local_activity</span> 
+            내 쿠폰함
+          </h2>
+          <span className="text-sm font-bold text-[#c59f59] bg-[#c59f59]/10 px-3 py-1 rounded-full">
+            사용 가능: {coupons.filter(c => !c.used).length}장
+          </span>
+        </div>
+        {coupons.length === 0 ? (
+          <div className="py-12 text-center text-gray-400">
+            <span className="material-symbols-outlined mx-auto mb-3 text-4xl text-gray-200 block">confirmation_number</span>
+            <p className="font-medium">보유한 쿠폰이 없습니다.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6">
+            {coupons.map((coupon) => (
+              <div key={coupon.id} className={`border rounded-xl p-5 relative overflow-hidden flex flex-col justify-between h-full ${coupon.used ? 'bg-gray-50 border-gray-200' : 'bg-amber-50 border-[#c59f59]/30 shadow-sm'}`}>
+                {/* 톱니바퀴 모형 장식 (우측 위) */}
+                <div className={`absolute -right-4 -top-4 w-16 h-16 rounded-full border-4 ${coupon.used ? 'border-gray-100 bg-white' : 'border-amber-100 bg-amber-50'}`}></div>
+                
+                <div className="relative z-10 mb-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className={`text-xs font-bold px-2 py-1 rounded ${coupon.used ? 'bg-gray-200 text-gray-500' : 'bg-[#0A192F] text-white'}`}>
+                      {coupon.type === 'percent' ? `${coupon.value}% 할인` : `${coupon.value.toLocaleString()}원 할인`}
+                    </span>
+                    <span className={`text-xs font-bold ${coupon.used ? 'text-red-400' : 'text-green-600'}`}>
+                      {coupon.used ? '사용 완료' : '사용 가능'}
+                    </span>
+                  </div>
+                  <h3 className={`font-bold text-lg leading-tight ${coupon.used ? 'text-gray-400 line-through' : 'text-gray-900'}`}>{coupon.name}</h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {coupon.minOrderAmount > 0 ? `${coupon.minOrderAmount.toLocaleString()}원 이상 구매 시` : '조건 없음'}
+                  </p>
+                </div>
+
+                <div className="relative z-10 mt-auto pt-4 border-t border-dashed border-gray-300 flex justify-between items-end">
+                  <div>
+                    <p className="text-[10px] text-gray-400 mb-0.5">쿠폰 코드</p>
+                    <p className={`font-mono font-bold tracking-wider ${coupon.used ? 'text-gray-400' : 'text-[#c59f59]'}`}>{coupon.code}</p>
+                  </div>
+                  <p className="text-[10px] text-gray-400 text-right">
+                    ~ {new Date(coupon.expiresAt).toLocaleDateString('ko-KR')} 까지
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 포인트 내역 */}

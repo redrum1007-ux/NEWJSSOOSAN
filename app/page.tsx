@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AuthControls from '@/components/AuthControls';
 import HeroSlider from '@/components/HeroSlider';
+import RecentNotices from '@/components/RecentNotices';
 import { Product } from '@/lib/products';
 
 export default function HomePage() {
@@ -29,7 +30,7 @@ export default function HomePage() {
             <nav className="hidden lg:flex items-center gap-8 text-slate-100">
               <Link className="text-sm font-medium hover:text-[#c59f59] transition-colors" href="/products">Shop</Link>
               <Link className="text-sm font-medium hover:text-[#c59f59] transition-colors" href="/about">Our Story</Link>
-              <Link className="text-sm font-medium hover:text-[#c59f59] transition-colors" href="/products">Gift Sets</Link>
+              <Link className="text-sm font-medium hover:text-[#c59f59] transition-colors" href="/products?category=선물세트">Gift Sets</Link>
             </nav>
           </div>
           <div className="flex items-center gap-6">
@@ -92,6 +93,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Recent Notices Section */}
+      <RecentNotices />
 
       {/* Brand Philosophy Section */}
       <section className="relative py-32 overflow-hidden">
