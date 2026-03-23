@@ -16,8 +16,41 @@ const notoParams = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "진성네이처푸드 - 50년 전통 프리미엄 건어물",
-  description: "청정 완도 바다의 신선함을 산지 직송으로 전해드리는 50년 전통의 프리미엄 건어물 브랜드 진성네이처푸드입니다.",
+  metadataBase: new URL('https://jinsungsoosan.co.kr'),
+  title: {
+    default: "진성수산 - 동해안 산지직송 프리미엄 건어물",
+    template: "%s | 진성수산",
+  },
+  description: "청정 동해 바다의 신선함을 산지 직송으로 전해드리는 50년 전통의 프리미엄 건어물 브랜드 진성수산(진성네이처푸드)입니다.",
+  keywords: ["진성수산", "진성네이처푸드", "동해안", "산지직송", "건어물", "반건조 오징어", "오징어", "프리미엄 건어물"],
+  openGraph: {
+    title: "진성수산 - 동해안 산지직송 프리미엄 건어물",
+    description: "청정 동해 바다의 신선함을 산지 직송으로 전해드리는 50년 전통의 프리미엄 건어물 브랜드 진성수산입니다.",
+    url: "https://jinsungsoosan.co.kr",
+    siteName: "진성수산",
+    images: [
+      {
+        url: "/images/og-default.jpg", // TODO: public 폴더에 실제 대표 이미지(1200x630) 추가 필요
+        width: 1200,
+        height: 630,
+        alt: "진성수산 대표 이미지",
+      },
+    ],
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "진성수산 - 동해안 산지직송 프리미엄 건어물",
+    description: "청정 동해 바다의 신선함을 산지 직송으로 전해드리는 50년 전통의 프리미엄 건어물 브랜드 진성수산입니다.",
+    images: ["/images/og-default.jpg"],
+  },
+  verification: {
+    google: "구글_서치콘솔_인증키를_여기에_넣어주세요",
+    other: {
+      "naver-site-verification": ["네이버_서치어드바이저_인증키를_여기에_넣어주세요"],
+    },
+  },
 };
 
 export default function RootLayout({
