@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Product } from '@/lib/products';
 import { useCartStore } from '@/store/useCartStore';
 import { useState, useEffect } from 'react';
+import ProductReviews from '@/components/ProductReviews';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -178,6 +179,8 @@ export default function ProductDetailPage() {
             className="rich-text-content"
             dangerouslySetInnerHTML={{ __html: product.detail }}
           />
+          
+          <ProductReviews productId={product.id} />
         </div>
       </section>
 

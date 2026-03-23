@@ -1,0 +1,251 @@
+﻿commit da3e11cadcaa3413a2a0c6151e6ffe4bb6925f3d
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Fri Mar 20 15:34:19 2026 +0900
+
+    deploy: trigger build for new env vars
+
+commit 058daa2b73252fd76f8f828a36495221c5a57d40
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Fri Mar 20 14:46:57 2026 +0900
+
+    style: fix mobile text overflow and payment param
+
+M	app/admin/page.tsx
+M	app/api/payments/success/route.ts
+M	app/api/products/route.ts
+M	app/cart/page.tsx
+M	app/globals.css
+M	app/mypage/page.tsx
+M	app/page.tsx
+M	app/products/page.tsx
+M	app/success/page.tsx
+M	components/AuthControls.tsx
+M	components/AuthModal.tsx
+A	components/RecentNotices.tsx
+A	deploy_log.txt
+A	deploy_log2.txt
+A	lib/constants.ts
+M	lib/db.ts
+M	lib/firebase.ts
+M	lib/products.ts
+M	next.config.ts
+A	public/welcome-coupon.png
+M	store/useCartStore.ts
+A	test_upload.txt
+
+commit b0e5e653592826043de28697b54bb63d32834364
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 17:04:41 2026 +0900
+
+    Refactor products API to use Firebase collections for unlimited data size
+
+M	app/api/products/route.ts
+M	lib/db.ts
+A	migrate.ts
+M	package-lock.json
+M	package.json
+A	test-db.ts
+
+commit 919b9a69d70960f4b785f92c9c467fecd60ac393
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 15:31:49 2026 +0900
+
+    Remove product desc from product cards to avoid displaying HTML entities
+
+M	app/page.tsx
+M	app/products/page.tsx
+
+commit 273f4b422fd29a742ffd658f99c712d9417aa738
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 15:28:21 2026 +0900
+
+    Fix order deletion logic with SEED_ORDERS empty db fallback
+
+M	app/admin/page.tsx
+M	app/api/orders/[id]/route.ts
+M	app/api/orders/route.ts
+
+commit c102496e3ee0e9160bd3b1e524838ca85df08290
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 15:08:48 2026 +0900
+
+    Strip &nbsp; from generated desc as well
+
+M	app/admin/page.tsx
+
+commit be7bc0534aa341c69160a486c26e64c88c64f281
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 15:08:12 2026 +0900
+
+    Remove desc below title in product detail page
+
+M	app/products/[id]/page.tsx
+
+commit 62bf14b780f2ad3a77021fb32583e13230ca1aa8
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 14:55:12 2026 +0900
+
+    Fix product detail html tag issue and modify table per request
+
+M	app/products/[id]/page.tsx
+
+commit 8186cbc6029fdfdcfe93013b420b950a1b70e7a2
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 14:45:06 2026 +0900
+
+    Disable Next.js api caching for products
+
+M	app/admin/page.tsx
+M	app/api/products/route.ts
+M	app/page.tsx
+M	app/products/[id]/page.tsx
+M	app/products/page.tsx
+A	builds.json
+
+commit 4200601382a4eeecb4828be8bb9f4099775543ed
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 14:24:09 2026 +0900
+
+    Fetch products from cloud api frontend and admin
+
+M	app/admin/page.tsx
+A	app/api/products/route.ts
+M	app/page.tsx
+M	app/products/[id]/page.tsx
+M	app/products/page.tsx
+
+commit 9f2ba898d9febd9e01ea53d416db49fdd869d113
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 14:05:33 2026 +0900
+
+    Fix admin login trim issue
+
+M	app/admin/page.tsx
+
+commit 8a2ee826105b5ccfaa4f3c0b8e35d45dfd05cc6e
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 13:46:47 2026 +0900
+
+    Add Firebase config for Netlify build
+
+A	.env.local
+
+commit bd1ea54164ca69ac24de1355c2394e0f4d864d90
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 13:31:22 2026 +0900
+
+    Trigger Netlify Build
+
+commit 74c0d1116fd52e7df4212ee9fb650db54e9d19b7
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Thu Mar 19 13:20:45 2026 +0900
+
+    Deploy Ready
+
+M	.gitignore
+A	QUICK_DEPLOY.md
+A	app/about/page.tsx
+A	app/admin/page.tsx
+A	app/api/coupon-templates/[id]/route.ts
+A	app/api/coupon-templates/route.ts
+A	app/api/coupon-templates/seed/route.ts
+A	app/api/coupons/[id]/use/route.ts
+A	app/api/coupons/route.ts
+A	app/api/coupons/validate/route.ts
+A	app/api/inquiries/[id]/route.ts
+A	app/api/inquiries/route.ts
+A	app/api/notices/[id]/route.ts
+A	app/api/notices/route.ts
+A	app/api/orders/[id]/route.ts
+A	app/api/orders/route.ts
+A	app/api/payments/success/route.ts
+A	app/api/points/admin/history/route.ts
+A	app/api/points/admin/route.ts
+A	app/api/points/route.ts
+A	app/api/seed-firestore/route.ts
+A	app/api/slides/[id]/route.ts
+A	app/api/slides/all/route.ts
+A	app/api/slides/route.ts
+A	app/api/stats/visit/route.ts
+A	app/auth/page.tsx
+A	app/cart/page.tsx
+R100	src/app/favicon.ico	app/favicon.ico
+A	app/globals.css
+A	app/inquiry/page.tsx
+A	app/layout.tsx
+A	app/mypage/page.tsx
+A	app/page.tsx
+A	app/privacy/page.tsx
+A	app/products/[id]/page.tsx
+A	app/products/page.tsx
+A	app/shipping-policy/page.tsx
+A	app/success/page.tsx
+A	app/terms/page.tsx
+A	components/AuthControls.tsx
+A	components/AuthModal.tsx
+A	components/AuthProvider.tsx
+A	components/HeroSlider.tsx
+A	components/VisitLogger.tsx
+A	data/coupon_templates.json
+A	data/coupons.json
+A	data/inquiries.json
+A	data/notices.json
+A	data/orders.json
+A	data/point_history.json
+A	data/slides.json
+A	data/user_points.json
+A	data/visits.json
+A	"data/\354\247\204\354\204\261\354\210\230\354\202\260-\353\251\224\354\235\270\355\216\230\354\235\264\354\247\200-png.png"
+A	deploy.log
+A	deploy_utf8.log
+A	lib/db.ts
+A	lib/firebase-admin.ts
+A	lib/firebase.ts
+A	lib/products.ts
+A	lib/types/coupon.ts
+A	lib/types/inquiry.ts
+A	lib/types/notice.ts
+A	lib/types/order.ts
+A	lib/types/point.ts
+A	lib/types/slide.ts
+A	lib/types/stats.ts
+A	netlify.toml
+M	package-lock.json
+M	package.json
+A	public/SLIDE3.jpg
+A	public/jinsung-main.png
+A	public/welcome_coupon_10percent.png
+A	refactor_db.js
+D	src/app/globals.css
+D	src/app/layout.tsx
+D	src/app/page.tsx
+A	store/useAuthStore.ts
+A	store/useCartStore.ts
+A	tailwind.config.ts
+A	ts_errors.log
+A	ts_errors_utf8.log
+M	tsconfig.json
+
+commit 7abf28bcfc55e8c8281de202af0aec48eb8acd61
+Author: redrum1007-ux <redrum1007@gmail.com>
+Date:   Wed Mar 18 16:29:23 2026 +0900
+
+    Initial commit from Create Next App
+
+A	.gitignore
+A	README.md
+A	eslint.config.mjs
+A	next.config.ts
+A	package-lock.json
+A	package.json
+A	postcss.config.mjs
+A	public/file.svg
+A	public/globe.svg
+A	public/next.svg
+A	public/vercel.svg
+A	public/window.svg
+A	src/app/favicon.ico
+A	src/app/globals.css
+A	src/app/layout.tsx
+A	src/app/page.tsx
+A	tsconfig.json
